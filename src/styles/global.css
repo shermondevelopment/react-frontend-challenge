@@ -1,0 +1,62 @@
+:root {
+  font-family: Avenir, Montserrat, sans-serif;
+  color: #1f2937;
+  background: #f8fafc;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+.app {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 32px;
+}
+
+.hello-world {
+  max-width: 560px;
+  width: 100%;
+}
+
+.hello-world__eyebrow {
+  display: block;
+  margin-bottom: 12px;
+  color: #0f766e;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hello-world h1 {
+  margin: 0 0 16px;
+  color: #111827;
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  line-height: 1;
+}
+
+.hello-world p {
+  margin: 0;
+  color: #4b5563;
+  font-size: 1.125rem;
+  line-height: 1.7;
+}
