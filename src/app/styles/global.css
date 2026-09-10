@@ -69,6 +69,7 @@
   --status-error: var(--primitive-error-500);
   --overlay-soft: var(--primitive-overlay-soft);
   --overlay-strong: var(--primitive-overlay-strong);
+  --input-placeholder: var(--primitive-login-placeholder);
 
   --background: var(--background-default);
   --foreground: var(--text-primary);
@@ -176,6 +177,17 @@ body {
 }
 
 .dark {
+  --background-default: var(--primitive-neutral-850);
+  --surface-default: var(--primitive-dark-card);
+  --border-default: var(--primitive-dark-border);
+  --text-primary: var(--primitive-neutral-white);
+  --text-secondary: var(--primitive-dark-text-secondary);
+  --text-muted: var(--primitive-dark-text-secondary);
+  --action-primary-default: var(--primitive-primary-400);
+  --action-primary-hover: var(--primitive-primary-400);
+  --focus-ring: var(--primitive-primary-400);
+  --overlay-strong: var(--primitive-neutral-975);
+  --input-placeholder: var(--primitive-dark-placeholder);
   --background: var(--primitive-neutral-850);
   --foreground: var(--primitive-neutral-50);
   --card: var(--primitive-dark-card);
@@ -192,7 +204,7 @@ body {
   --accent-foreground: var(--text-on-primary);
   --destructive: var(--status-error);
   --border: var(--primitive-dark-border);
-  --input: var(--primitive-dark-border);
+  --input: var(--primitive-neutral-900);
   --ring: var(--primitive-primary-400);
   --sidebar: var(--primitive-neutral-850);
   --sidebar-foreground: var(--primitive-neutral-50);

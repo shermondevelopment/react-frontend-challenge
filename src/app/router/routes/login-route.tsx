@@ -15,5 +15,5 @@ export const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/login',
   validateSearch: validateLoginSearch,
-  component: lazyRouteComponent(() => import('@/pages/login'), 'LoginPage'),
+  component: lazyRouteComponent(() => import('@/pages/signin'), 'SigninPage'),
 })
