@@ -1,22 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useNavigate } from '@tanstack/react-router'
 import { useForm } from 'react-hook-form'
-import type { User } from '@/entities/auth/model/types'
 import { useAuthStore } from '@/entities/auth/model/store'
+import { signInRequest } from '@/shared/api/auth'
 import { signInSchema, type SignInFormData } from './schema'
 
 interface UseSigninOptions {
   redirectTo: '/discovery'
-}
-
-async function fakeSignIn({ email }: SignInFormData): Promise<User> {
-  await new Promise((resolve) => setTimeout(resolve, 600))
-
-  return {
-    id: 'mock-user-1',
-    email,
-    name: email.split('@')[0] || 'Usuário',
-  }
 }
 
 export function useSignin({ redirectTo }: UseSigninOptions) {
@@ -32,7 +22,7 @@ export function useSignin({ redirectTo }: UseSigninOptions) {
 
   const onSubmit = form.handleSubmit(async (data) => {
     try {
-      const user = await fakeSignIn(data)
+      const user = await signInRequest(data)
       login(user)
       await navigate({ to: redirectTo, replace: true })
     } catch (error) {
