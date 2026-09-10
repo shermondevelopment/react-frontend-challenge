@@ -1,4 +1,5 @@
-import { createRoute, lazyRouteComponent } from '@tanstack/react-router'
+import { createRoute, lazyRouteComponent, redirect } from '@tanstack/react-router'
+import { useAuthStore } from '@/entities/auth/model/store'
 import { rootRoute } from './root-route'
 
 export interface LoginSearch {
@@ -15,5 +16,10 @@ export const loginRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: '/login',
   validateSearch: validateLoginSearch,
+  beforeLoad: () => {
+    if (useAuthStore.getState().isAuthenticated) {
+      throw redirect({ to: '/discovery' })
+    }
+  },
   component: lazyRouteComponent(() => import('@/pages/signin'), 'SigninPage'),
 })

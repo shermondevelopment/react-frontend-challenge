@@ -21,7 +21,7 @@ export function SigninPage() {
           <p className="text-base font-medium text-text-secondary">Bem-vindo de volta</p>
         </header>
 
-        <SigninForm />
+        <SigninForm redirectTo="/discovery" />
       </section>
     </main>
   )

@@ -4,9 +4,13 @@ import { Button } from '@/shared/ui/button'
 import { Input } from '@/shared/ui/input'
 import { useSignin } from '../model/use-signin'
 
-export function SigninForm() {
+interface SigninFormProps {
+  redirectTo: '/discovery'
+}
+
+export function SigninForm({ redirectTo }: SigninFormProps) {
   const [showPassword, setShowPassword] = useState(false)
-  const { form, onSubmit } = useSignin()
+  const { form, onSubmit } = useSignin({ redirectTo })
   const emailError = form.formState.errors.email
   const passwordError = form.formState.errors.password
 
