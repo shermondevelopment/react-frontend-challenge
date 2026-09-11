@@ -1,0 +1,1 @@
+export { mainNavigationItems, type MainNavigationItem } from './model/main-navigation'
