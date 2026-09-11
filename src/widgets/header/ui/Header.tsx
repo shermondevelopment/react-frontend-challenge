@@ -1,10 +1,10 @@
 import { Link } from '@tanstack/react-router'
 import { Clapperboard, LogOut, Moon, Sun } from 'lucide-react'
 import { useLogout } from '@/features/auth/logout'
-import { mainNavigationItems } from '@/features/navigation'
 import { useTheme } from '@/features/theme'
 import { Button } from '@/shared/ui/button'
 import { Switch } from '@/shared/ui/switch'
+import { mainNavigationItems } from '../model/main-navigation'
 
 const navLinkClassName =
   'inline-flex h-8 items-center rounded-lg px-2.5 text-sm font-semibold transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none sm:px-4'
