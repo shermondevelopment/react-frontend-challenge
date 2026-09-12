@@ -34,6 +34,39 @@ export function formatYear(dateString?: string): number {
   return isNaN(year) ? new Date().getFullYear() : year
 }
 
+export function formatReleaseDate(dateString?: string): string {
+  if (!dateString) return 'Data não informada'
+  try {
+    const parts = dateString.split('-')
+    if (parts.length === 3) {
+      return `${parts[2]}/${parts[1]}/${parts[0]}`
+    }
+    return dateString
+  } catch {
+    return dateString
+  }
+}
+
+export function getGenreNames(
+  movie: Movie,
+  genresOrMap?: TmdbGenre[] | Record<number, string>
+): string[] {
+  if (!genresOrMap) {
+    return movie.genreNames?.length > 0 ? movie.genreNames : ['Geral']
+  }
+
+  const genreMap = Array.isArray(genresOrMap)
+    ? buildGenreMap(genresOrMap)
+    : genresOrMap
+
+  const names = movie.genreIds
+    .map((id) => genreMap[id])
+    .filter(Boolean)
+
+  if (names.length > 0) return names
+  return movie.genreNames?.length > 0 ? movie.genreNames : ['Geral']
+}
+
 export function mapTmdbMovieToEntity(
   dto: TmdbMovieDto,
   genreMap: Record<number, string> = DEFAULT_TMDB_GENRES

@@ -1,7 +1,7 @@
 import { AlertCircle, Film, RefreshCw, SearchX } from 'lucide-react'
 import { MovieCard, MovieCardSkeleton, useMovies } from '@/entities/movie'
 import type { UseMovieFiltersReturn } from '@/features/filter-movies'
-import { LikeButton } from '@/features/like-movie'
+import { WatchlistButton } from '@/features/watchlist'
 import { Button } from '@/shared/ui/button'
 import { MoviesListHeader } from './movies-list-header'
 import { MoviesPagination } from './movies-pagination'
@@ -102,7 +102,7 @@ export function MoviesList({ filtersControl, className = '' }: MoviesListProps) 
             <MovieCard
               key={movie.id}
               movie={movie}
-              actionSlot={<LikeButton movieId={movie.id} movieTitle={movie.title} />}
+              actionSlot={<WatchlistButton movie={movie} />}
             />
           ))}
         </div>
