@@ -4,9 +4,10 @@ import type { ComponentProps, ReactNode } from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { Header } from './Header'
 
-const { handleLogoutMock, setThemeMock } = vi.hoisted(() => ({
+const { handleLogoutMock, setThemeMock, mockWatchlistCount } = vi.hoisted(() => ({
   handleLogoutMock: vi.fn(),
   setThemeMock: vi.fn(),
+  mockWatchlistCount: { value: 0 },
 }))
 
 vi.mock('@tanstack/react-router', () => ({
@@ -44,10 +45,15 @@ vi.mock('@/features/theme', () => ({
   }),
 }))
 
+vi.mock('@/features/watchlist', () => ({
+  useWatchlistCount: () => mockWatchlistCount.value,
+}))
+
 describe('Header', () => {
   beforeEach(() => {
     handleLogoutMock.mockReset()
     setThemeMock.mockReset()
+    mockWatchlistCount.value = 0
   })
 
   it('renders the brand and main navigation links', () => {
@@ -66,6 +72,15 @@ describe('Header', () => {
       'href',
       '/watchlist'
     )
+  })
+
+  it('renders watchlist count badge when count > 0', () => {
+    mockWatchlistCount.value = 4
+    render(<Header />)
+
+    const badge = screen.getByTestId('watchlist-count-badge')
+    expect(badge).toBeInTheDocument()
+    expect(badge).toHaveTextContent('4')
   })
 
   it('marks the current route as active', () => {
