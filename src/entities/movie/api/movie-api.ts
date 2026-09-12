@@ -1,9 +1,12 @@
 import { tmdbApiClient } from '@/shared/api'
-import { mapTmdbMovieToEntity } from '../model/movie-helpers'
+import {
+  mapTmdbMovieDetailsToEntity,
+  mapTmdbMovieToEntity,
+} from '../model/movie-helpers'
 import type {
   GetMoviesParams,
   GetMoviesResponse,
-  Movie,
+  MovieDetails,
   TmdbGenre,
   TmdbMovieDto,
   TmdbPaginatedResponse,
@@ -110,12 +113,15 @@ export const movieApi = {
     }
   },
 
-  async getMovieById(id: string | number): Promise<Movie | null> {
+  async getMovieById(id: string | number): Promise<MovieDetails | null> {
     try {
       const { data } = await tmdbApiClient.get<TmdbMovieDto>(`/movie/${id}`, {
-        params: { language: 'pt-BR' },
+        params: {
+          language: 'pt-BR',
+          append_to_response: 'release_dates,videos,credits',
+        },
       })
-      return mapTmdbMovieToEntity(data)
+      return mapTmdbMovieDetailsToEntity(data)
     } catch {
       return null
     }

@@ -1,5 +1,6 @@
-import type { ReactNode } from 'react'
+import { Link } from '@tanstack/react-router'
 import { Star } from 'lucide-react'
+import type { ReactNode } from 'react'
 import { Badge } from '@/shared/ui/badge'
 import { formatRating } from '../model/movie-helpers'
 import type { Movie } from '../model/types'
@@ -21,18 +22,20 @@ export function MovieCard({ movie, actionSlot, className = '', onClick }: MovieC
       onClick={onClick}
     >
       <div className="relative aspect-[2/3] w-full overflow-hidden rounded-2xl bg-neutral-900 shadow-md ring-1 ring-white/10 transition-all duration-300 group-hover:shadow-xl group-hover:ring-primary/40">
-        <img
-          src={movie.posterUrl}
-          alt={`Poster do filme ${movie.title}`}
-          loading="lazy"
-          className="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
-          onError={(e) => {
-            e.currentTarget.src =
-              'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80'
-          }}
-        />
+        <Link to="/movie/$id" params={{ id: movie.id }} className="block size-full">
+          <img
+            src={movie.posterUrl}
+            alt={`Poster do filme ${movie.title}`}
+            loading="lazy"
+            className="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+            onError={(e) => {
+              e.currentTarget.src =
+                'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80'
+            }}
+          />
 
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-60 transition-opacity group-hover:opacity-80" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-60 transition-opacity group-hover:opacity-80" />
+        </Link>
 
         {actionSlot && (
           <div className="absolute right-3 top-3 z-10 transition-transform active:scale-90">
@@ -41,7 +44,7 @@ export function MovieCard({ movie, actionSlot, className = '', onClick }: MovieC
         )}
 
         {movie.year > 0 && (
-          <div className="absolute left-3 top-3 z-10 flex items-center gap-1.5">
+          <div className="absolute left-3 top-3 z-10 flex items-center gap-1.5 pointer-events-none">
             <span className="rounded-md border border-white/15 bg-black/50 px-2 py-0.5 text-xs font-semibold text-white/90 backdrop-blur-md">
               {movie.year}
             </span>
@@ -50,12 +53,14 @@ export function MovieCard({ movie, actionSlot, className = '', onClick }: MovieC
       </div>
 
       <div className="flex flex-col gap-1.5 pt-3">
-        <h3
-          title={movie.title}
-          className="truncate text-base font-bold tracking-tight text-foreground transition-colors group-hover:text-primary"
-        >
-          {movie.title}
-        </h3>
+        <Link to="/movie/$id" params={{ id: movie.id }} className="block focus:outline-none">
+          <h3
+            title={movie.title}
+            className="truncate text-base font-bold tracking-tight text-foreground transition-colors group-hover:text-primary"
+          >
+            {movie.title}
+          </h3>
+        </Link>
 
         <div className="flex items-center justify-between text-xs font-medium text-muted-foreground">
           <Badge

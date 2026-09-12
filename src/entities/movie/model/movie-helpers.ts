@@ -67,6 +67,50 @@ export function getGenreNames(
   return movie.genreNames?.length > 0 ? movie.genreNames : ['Geral']
 }
 
+export function formatDuration(minutes?: number): string {
+  if (!minutes || minutes <= 0) return ''
+  const hours = Math.floor(minutes / 60)
+  const remaining = minutes % 60
+  if (hours === 0) return `${remaining}m`
+  if (remaining === 0) return `${hours}h`
+  return `${hours}h ${remaining}m`
+}
+
+export function extractCertification(releaseDates?: TmdbMovieDto['release_dates']): string {
+  if (!releaseDates?.results || releaseDates.results.length === 0) {
+    return '14+'
+  }
+
+  const brRelease = releaseDates.results.find((r) => r.iso_3166_1 === 'BR')
+  if (brRelease) {
+    const cert = brRelease.release_dates.find((d) => Boolean(d.certification?.trim()))?.certification?.trim()
+    if (cert) {
+      if (cert.toUpperCase() === 'L' || cert === '0') return 'Livre'
+      return cert.endsWith('+') ? cert : `${cert}+`
+    }
+  }
+
+  const usRelease = releaseDates.results.find((r) => r.iso_3166_1 === 'US')
+  if (usRelease) {
+    const cert = usRelease.release_dates.find((d) => Boolean(d.certification?.trim()))?.certification?.trim()
+    if (cert) {
+      if (cert === 'PG-13') return '14+'
+      if (cert === 'R') return '16+'
+      if (cert === 'NC-17') return '18+'
+      if (cert === 'PG') return '10+'
+      if (cert === 'G') return 'Livre'
+      return cert
+    }
+  }
+
+  for (const item of releaseDates.results) {
+    const cert = item.release_dates.find((d) => Boolean(d.certification?.trim()))?.certification?.trim()
+    if (cert) return cert
+  }
+
+  return '14+'
+}
+
 export function mapTmdbMovieToEntity(
   dto: TmdbMovieDto,
   genreMap: Record<number, string> = DEFAULT_TMDB_GENRES
@@ -83,7 +127,7 @@ export function mapTmdbMovieToEntity(
     originalTitle: dto.original_title || '',
     synopsis: dto.overview || 'Sinopse indisponível no momento.',
     posterUrl: getTmdbImageUrl(dto.poster_path, 'w500'),
-    backdropUrl: dto.backdrop_path ? getTmdbImageUrl(dto.backdrop_path, 'w780') : null,
+    backdropUrl: dto.backdrop_path ? getTmdbImageUrl(dto.backdrop_path, 'original') : null,
     rating: Number(dto.vote_average) || 0,
     voteCount: dto.vote_count || 0,
     popularity: dto.popularity || 0,
@@ -91,6 +135,73 @@ export function mapTmdbMovieToEntity(
     releaseDate: dto.release_date || '',
     genreIds,
     genreNames: genreNames.length > 0 ? genreNames : ['Geral'],
+  }
+}
+
+export function extractTrailer(videos?: TmdbMovieDto['videos']): import('./types').MovieTrailer | null {
+  if (!videos?.results || videos.results.length === 0) return null
+
+  const youtubeVideos = videos.results.filter(
+    (v) => v.site.toLowerCase() === 'youtube' && Boolean(v.key)
+  )
+
+  const officialTrailer =
+    youtubeVideos.find((v) => v.type.toLowerCase() === 'trailer' && v.official) ||
+    youtubeVideos.find((v) => v.type.toLowerCase() === 'trailer') ||
+    youtubeVideos.find((v) => v.type.toLowerCase() === 'teaser') ||
+    youtubeVideos[0]
+
+  if (!officialTrailer) return null
+
+  return {
+    id: officialTrailer.id,
+    key: officialTrailer.key,
+    name: officialTrailer.name,
+    site: officialTrailer.site,
+    url: `https://www.youtube.com/watch?v=${officialTrailer.key}`,
+    thumbnailUrl: `https://img.youtube.com/vi/${officialTrailer.key}/hqdefault.jpg`,
+  }
+}
+
+export function extractDirector(credits?: TmdbMovieDto['credits']): string {
+  if (!credits?.crew || credits.crew.length === 0) return 'Diretor não informado'
+  const director = credits.crew.find((member) => member.job?.toLowerCase() === 'director')
+  return director?.name || 'Diretor não informado'
+}
+
+export function extractCast(credits?: TmdbMovieDto['credits']): import('./types').MovieCastMember[] {
+  if (!credits?.cast || credits.cast.length === 0) return []
+  return credits.cast.slice(0, 8).map((actor) => ({
+    id: actor.id,
+    name: actor.name,
+    character: actor.character || 'Personagem',
+    profileUrl: actor.profile_path ? getTmdbImageUrl(actor.profile_path, 'w185') : null,
+  }))
+}
+
+export function mapTmdbMovieDetailsToEntity(
+  dto: TmdbMovieDto,
+  genreMap: Record<number, string> = DEFAULT_TMDB_GENRES
+): import('./types').MovieDetails {
+  const base = mapTmdbMovieToEntity(dto, genreMap)
+  const certification = extractCertification(dto.release_dates)
+  const trailer = extractTrailer(dto.videos)
+  const director = extractDirector(dto.credits)
+  const cast = extractCast(dto.credits)
+
+  return {
+    ...base,
+    runtime: dto.runtime,
+    durationFormatted: formatDuration(dto.runtime),
+    tagline: dto.tagline || '',
+    status: dto.status || 'Lançado',
+    director,
+    certification,
+    ageRatingFormatted: certification === 'Livre' ? 'Livre' : `${certification} (Recomendado)`,
+    languages: dto.spoken_languages?.map((lang) => lang.name || lang.english_name) || ['Português'],
+    studios: dto.production_companies?.map((studio) => studio.name) || ['CineDash Originals'],
+    trailer,
+    cast,
   }
 }
 

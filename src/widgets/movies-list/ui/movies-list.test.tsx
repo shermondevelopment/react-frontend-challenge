@@ -1,8 +1,17 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import type { ComponentProps, ReactNode } from 'react'
 import { describe, expect, it, vi } from 'vitest'
 import { useMovieFilters } from '@/features/filter-movies'
 import { MoviesList } from './movies-list'
+
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ children, to, ...props }: ComponentProps<'a'> & { children: ReactNode; to: string }) => (
+    <a href={to} {...props}>
+      {children}
+    </a>
+  ),
+}))
 
 vi.mock('@/shared/api', async (importOriginal) => {
   const actual = await importOriginal<typeof import('@/shared/api')>()

@@ -126,7 +126,7 @@ describe('movieApi with TMDB', () => {
     expect(response.items[0].title).toBe('Matrix')
   })
 
-  it('fetches single movie detail from /movie/:id', async () => {
+  it('fetches single movie detail with append_to_response=release_dates,videos,credits from /movie/:id', async () => {
     vi.mocked(tmdbApiClient.get).mockResolvedValueOnce({
       data: {
         id: 550,
@@ -134,19 +134,87 @@ describe('movieApi with TMDB', () => {
         original_title: 'Fight Club',
         overview: 'Um homem deprimido...',
         poster_path: '/fightclub.jpg',
+        backdrop_path: '/fightclub_backdrop.jpg',
         release_date: '1999-10-15',
         vote_average: 8.4,
         vote_count: 26000,
         popularity: 90,
+        runtime: 139,
+        tagline: 'Mischief. Mayhem. Soap.',
         genres: [{ id: 18, name: 'Drama' }],
+        release_dates: {
+          results: [
+            {
+              iso_3166_1: 'BR',
+              release_dates: [{ certification: '18', release_date: '1999-10-29', type: 3 }],
+            },
+          ],
+        },
+        videos: {
+          results: [
+            {
+              id: 'vid1',
+              key: 'qtRKdVBl-7g',
+              name: 'Trailer Oficial',
+              site: 'YouTube',
+              type: 'Trailer',
+              official: true,
+              size: 1080,
+              published_at: '2020-01-01',
+              iso_639_1: 'en',
+              iso_3166_1: 'US',
+            },
+          ],
+        },
+        credits: {
+          cast: [
+            {
+              id: 819,
+              name: 'Edward Norton',
+              character: 'O Narrador',
+              profile_path: '/norton.jpg',
+              adult: false,
+              gender: 2,
+              known_for_department: 'Acting',
+              original_name: 'Edward Norton',
+              popularity: 45,
+              cast_id: 4,
+              credit_id: 'cr1',
+              order: 0,
+            },
+          ],
+          crew: [
+            {
+              id: 7467,
+              name: 'David Fincher',
+              job: 'Director',
+              department: 'Directing',
+              adult: false,
+              gender: 2,
+              known_for_department: 'Directing',
+              original_name: 'David Fincher',
+              popularity: 30,
+              profile_path: '/fincher.jpg',
+              credit_id: 'cr3',
+            },
+          ],
+        },
       },
     } as never)
 
     const movie = await movieApi.getMovieById(550)
     expect(tmdbApiClient.get).toHaveBeenCalledWith('/movie/550', {
-      params: { language: 'pt-BR' },
+      params: {
+        language: 'pt-BR',
+        append_to_response: 'release_dates,videos,credits',
+      },
     })
     expect(movie?.title).toBe('Clube da Luta')
     expect(movie?.genreNames).toContain('Drama')
+    expect(movie?.certification).toBe('18+')
+    expect(movie?.durationFormatted).toBe('2h 19m')
+    expect(movie?.trailer?.key).toBe('qtRKdVBl-7g')
+    expect(movie?.director).toBe('David Fincher')
+    expect(movie?.cast?.[0]?.name).toBe('Edward Norton')
   })
 })

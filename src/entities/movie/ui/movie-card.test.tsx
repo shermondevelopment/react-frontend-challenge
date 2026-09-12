@@ -1,7 +1,16 @@
 import { render, screen } from '@testing-library/react'
-import { describe, expect, it } from 'vitest'
+import type { ComponentProps, ReactNode } from 'react'
+import { describe, expect, it, vi } from 'vitest'
 import type { Movie } from '../model/types'
 import { MovieCard } from './movie-card'
+
+vi.mock('@tanstack/react-router', () => ({
+  Link: ({ children, to, ...props }: ComponentProps<'a'> & { children: ReactNode; to: string }) => (
+    <a href={to} {...props}>
+      {children}
+    </a>
+  ),
+}))
 
 const mockMovie: Movie = {
   id: '157336',
