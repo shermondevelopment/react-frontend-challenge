@@ -1,14 +1,5 @@
-import { Header } from '@/widgets/header'
+import { MoviesPage } from '@/pages/movies'
 
 export function DiscoveryPage() {
-  return (
-    <div className="min-h-screen bg-background text-foreground">
-      <Header />
-      <main className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-10">
-        <section className="space-y-2">
-          <h1 className="text-2xl font-extrabold text-text-primary">Filmes Disponíveis</h1>
-        </section>
-      </main>
-    </div>
-  )
+  return <MoviesPage />
 }
