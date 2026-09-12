@@ -2,6 +2,16 @@
 
 > Dashboard moderno e intuitivo para curadoria e descoberta de filmes consumindo a **[TMDB API](https://developer.themoviedb.org/docs/getting-started)**.
 
+---
+
+## 🎨 Protótipo & Design (Figma)
+
+> 🔗 **Layout e identidade visual inspirados no protótipo da comunidade do Figma:**  
+> ### 👉 **[Clique aqui para abrir o projeto no Figma](https://www.figma.com/community/file/1680570364845382959)**  
+> Link direto: `https://www.figma.com/community/file/1680570364845382959`
+
+---
+
 Construído com **React 19**, **TypeScript**, **Vite**, **Tailwind CSS v4**, **TanStack Router**, **TanStack Query**, gerenciamento de estado via **Zustand** e estruturado seguindo o padrão **Feature-Sliced Design (FSD)**.
 
 ---
