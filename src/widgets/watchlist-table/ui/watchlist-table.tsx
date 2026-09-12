@@ -17,6 +17,7 @@ import {
   Trash2,
 } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { toast } from 'sonner'
 import type { Movie } from '@/entities/movie'
 import {
   formatRating,
@@ -124,7 +125,10 @@ export function WatchlistTable({ className = '' }: WatchlistTableProps) {
                 type="button"
                 size="icon-sm"
                 variant="ghost"
-                onClick={() => remove(movie.id)}
+                onClick={() => {
+                  remove(movie.id)
+                  toast.info(`"${movie.title}" removido da watchlist.`)
+                }}
                 data-testid={`remove-watchlist-${movie.id}`}
                 aria-label={`Remover ${movie.title} da watchlist`}
                 className="size-8 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive cursor-pointer"

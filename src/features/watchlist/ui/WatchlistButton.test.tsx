@@ -1,9 +1,18 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { toast } from 'sonner'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { Movie } from '@/entities/movie'
 import { useWatchlistStore } from '../model/store'
 import { WatchlistButton } from './WatchlistButton'
+
+vi.mock('sonner', () => ({
+  toast: {
+    success: vi.fn(),
+    info: vi.fn(),
+    error: vi.fn(),
+  },
+}))
 
 const mockMovie: Movie = {
   id: '550',
@@ -24,6 +33,7 @@ const mockMovie: Movie = {
 
 describe('WatchlistButton', () => {
   beforeEach(() => {
+    vi.clearAllMocks()
     useWatchlistStore.setState({ items: [] })
   })
 
@@ -32,17 +42,27 @@ describe('WatchlistButton', () => {
     render(<WatchlistButton movie={mockMovie} />)
 
     const button = screen.getByRole('button', {
-      name: /adicionar clube da luta aos favoritos/i,
+      name: /adicionar clube da luta à watchlist/i,
     })
     expect(button).toHaveAttribute('aria-pressed', 'false')
 
     await user.click(button)
 
+    expect(toast.success).toHaveBeenCalledWith(
+      '"Clube da Luta" adicionado à watchlist com sucesso!'
+    )
+
     expect(
       screen.getByRole('button', {
-        name: /remover clube da luta dos favoritos/i,
+        name: /remover clube da luta da watchlist/i,
       })
     ).toHaveAttribute('aria-pressed', 'true')
+
+    await user.click(button)
+
+    expect(toast.info).toHaveBeenCalledWith(
+      '"Clube da Luta" removido da watchlist.'
+    )
   })
 
   it('renders with label when showLabel is true', () => {
