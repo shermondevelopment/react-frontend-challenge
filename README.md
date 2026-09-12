@@ -1,88 +1,144 @@
-# ⚛️ Desafio React Frontend
+# 🎬 CineDash
 
-Bem-vindo ao repositório de avaliação técnica para a vaga de **Desenvolvedor React Pleno**.
-
-Este não é apenas um teste de codificação; é uma oportunidade para você demonstrar como estrutura aplicações escaláveis, toma decisões arquiteturais e prioriza a experiência do usuário.
-
-Estamos buscando profissionais que entendam que "fazer funcionar" é apenas o primeiro passo. O nosso foco está também em: **Manutenibilidade, Performance e Boas Práticas.**
+> Dashboard moderno e intuitivo para curadoria e descoberta de filmes consumindo a **[TMDB API](https://developer.themoviedb.org/docs/getting-started)**.
 
 ---
 
-## 🎯 O Objetivo
+## 🎨 Protótipo & Design (Figma)
 
-O desafio consiste em desenvolver uma aplicação Front-end que consuma uma API pública, focando na criação de interfaces ricas (Dashboards, Tabelas, Filtros) e na gestão eficiente de estado e dados assíncronos.
-
-### 📂 Escolha sua Missão
-
-Você tem a liberdade de escolher **um** dos dois desafios abaixo para implementar. Ambos possuem o mesmo peso e complexidade técnica. Escolha aquele com o qual você se sentir mais criativo:
-
-- **[Opção A: CineDash (Filmes)](./cases/01-cinedash.md)** – Crie um dashboard analítico para curadoria de cinema.
-- **[Opção B: Libris (Livros)](./cases/02-libris.md)** – Desenvolva um gerenciador de biblioteca pessoal e estante virtual.
+> 🔗 **Layout e identidade visual inspirados no protótipo da comunidade do Figma:**  
+> ### 👉 **[Clique aqui para abrir o projeto no Figma](https://www.figma.com/community/file/1680570364845382959)**  
+> Link direto: `https://www.figma.com/community/file/1680570364845382959`
 
 ---
 
-## 🛠 Tech Stack Obrigatória
-
-Para alinhar com a nossa stack atual e garantir uma avaliação justa, exigimos o uso das seguintes tecnologias. **Por favor, não utilize alternativas (ex: Redux ou Context API para estado global complexo) a menos que justificável no seu README.**
-
-- **Core:** React 18+, TypeScript (Strict), Vite.
-- **Server State & Cache:** TanStack Query.
-- **Client State:** Zustand.
-- **Routing:** TanStack Router (Preferencial) ou React Router v6 (com Data Loaders).
-- **UI Components:** Shadcn/ui + TailwindCSS.
-- **Formulários:** React Hook Form ou TanStack Form + Zod (validação).
-- **Testes:** Vitest + React Testing Library.
-
-> **Diferencial:** Implementação de `TanStack Table` para listagens complexas.
+Construído com **React 19**, **TypeScript**, **Vite**, **Tailwind CSS v4**, **TanStack Router**, **TanStack Query**, gerenciamento de estado via **Zustand** e estruturado seguindo o padrão **Feature-Sliced Design (FSD)**.
 
 ---
 
-## 🧠 Critérios de Avaliação (O que olhamos)
+## ✨ O que tem na aplicação?
 
-Seu código será revisado como se fosse um Pull Request real para a nossa codebase de produção.
+### 🔐 Autenticação Simulada
+- Formulário tipado e validado via **[Zod](https://zod.dev/)** + **React Hook Form**.
+- Sessão persistida em **`localStorage`** com o middleware `persist` do **Zustand**.
+- Rotas protegidas com _route guards_ nativos do **[TanStack Router](https://tanstack.com/router/latest)** (redireciona automaticamente caso o usuário não esteja autenticado).
 
-### 1. Arquitetura e Organização
+### 🍿 Discovery (Exploração & Filtros)
+- Listagem dos filmes em destaque da semana.
+- Busca em tempo real com _debounce_ de 400ms.
+- **Filtros combináveis**:
+  - Gêneros cinematográficos (chips interativos);
+  - Ano de lançamento (range de anos);
+  - Nota mínima (slider interativo de rating);
+  - Ordenação por popularidade, título ou avaliação.
+- **Sincronização com a URL**: filtros e paginação são refletidos na query string como fonte única de verdade (fácil de compartilhar links ou usar o histórico do navegador).
+- Feedback visual durante carregamento com _skeletons_ customizados.
 
-- Uso de **Feature-Sliced Design (FSD)**, Clean Architecture ou uma estrutura modular sólida.
-- Separação clara entre UI (Componentes), Lógica (Hooks) e Dados (Services/Adapters).
-- Código limpo, legível e seguindo princípios SOLID.
+### 📌 Watchlist Interativa
+- Adição e remoção de filmes salvos em `localStorage`.
+- Visualização em tabela completa via **[TanStack Table](https://tanstack.com/table/latest)**: ordenação por colunas e filtro por título.
+- Modal de confirmação para remoções e feedback imediato via toasts (**Sonner**).
+- Design responsivo adaptado para desktop e mobile.
 
-### 2. Qualidade Técnica
+### 🎥 Detalhes do Filme
+- Página dedicada com sinopse, gêneros, elenco principal e metadados.
+- Player de trailer integrado com embed seguro do YouTube.
+- Ação rápida para salvar ou remover da sua Watchlist.
 
-- Domínio do **TypeScript** (evitar `any`, tipagem correta de generics e props).
-- Uso correto do **TanStack Query** (cache keys, invalidation, prefetching).
-- Tratamento de erros e estados de loading (Skeletons, Error Boundaries).
-- Performance (memorização onde necessário, debouncing em buscas).
-
-### 3. Testes e Confiabilidade
-
-- Não buscamos 100% de cobertura, mas sim **testes significativos**.
-- Testes unitários em hooks complexos e utilitários.
-- Testes de integração nos fluxos principais (ex: Adicionar item à lista, filtrar tabela).
-
-### 4. Documentação e Git
-
-- Histórico de commits organizado.
-- Arquivo `INSTRUCTIONS.md` com instruções claras de como rodar o projeto e qual projeto foi escolhido.
-- Arquivo `ARCHITECTURE.md` explicando suas decisões técnicas (Por que usou X? Como resolveu Y?).
-
----
-
-## 🚀 Como entregar
-
-1.  Faça um **fork** deste repositório para a sua própria conta do GitHub.
-2.  Desenvolva sua solução em uma branch separada (ex: `feature/cinedash-impl` ou `feature/libris-impl`).
-3.  Quando finalizar, abra um **Pull Request** da sua branch de desenvolvimento para a branch `main` do **seu** repositório forkado. **Atenção: Não abra o PR para o repositório original da empresa.**
-4.  No corpo do PR, utilize o template fornecido e inclua uma breve descrição do que foi feito, além do projeto escolhido.
-5.  Envie o link do seu Pull Request (ou do repositório) para o recrutador responsável.
+### 🌓 Tema Dark / Light
+- Alternância rápida entre modos claro e escuro com preferência salva no navegador (`localStorage`).
 
 ---
 
-## ⏳ Prazo e Escopo
+## 🏗️ Arquitetura (Feature-Sliced Design)
 
-Sabemos que este é um desafio complexo.
+O projeto foi estruturado seguindo o padrão **[Feature-Sliced Design (FSD)](https://feature-sliced.design/)**, organizando o código em camadas com limites bem definidos de responsabilidade:
 
-- **Prazo para entrega:** Você terá o prazo de 7 dias corridos para realização do desafio.
-- **Faltou tempo?** Se não conseguir entregar tudo, **priorize a qualidade sobre a quantidade**. É melhor entregar uma funcionalidade perfeitamente arquitetada e testada do que três funcionalidades quebradas. Documente o que faltou no seu README.
+```txt
+src/
+├── app/        # Inicialização da app, providers globais, router e estilos
+├── pages/      # Views completas correspondentes às rotas
+├── widgets/    # Blocos compostos e autônomos (Header, MoviesFilters, WatchlistTable...)
+├── features/   # Casos de uso e interações (auth/signin, auth/logout, filter-movies, theme...)
+├── entities/   # Modelos de domínio, tipos e stores de entidade (movie, auth...)
+└── shared/     # Componentes base (shadcn/ui), api clients (TMDB), hooks e utils
+```
 
-**Boa sorte! Estamos ansiosos para ver seu código.** 🚀
+- **Code Splitting**: carregamento sob demanda por rota com `lazyRouteComponent`.
+- **Cache Otimizado**: gerenciamento de estado assíncrono com **TanStack Query**, configurado com `staleTime` para evitar chamadas redundantes à API.
+- **Acessibilidade**: navegação acessível, elementos semânticos e estados descritivos.
+
+---
+
+## 🚀 Como rodar o projeto
+
+### 1. Pré-requisitos
+- Node.js (versão 20+ recomendada)
+- Gerenciador de pacotes `npm`
+- Uma chave de API (**API Read Access Token**) do [The Movie Database (TMDB)](https://www.themoviedb.org/settings/api)
+
+### 2. Configurar Variáveis de Ambiente
+
+Crie um arquivo `.env` (ou `.env.local`) a partir do exemplo:
+
+```bash
+cp .env.example .env
+```
+
+Preencha com o seu token do TMDB:
+
+```env
+# API Read Access Token (Bearer Token do TMDB)
+VITE_TMDB_ACCESS_TOKEN=seu_access_token_aqui
+
+# URL base da API
+VITE_TMDB_BASE_URL=https://api.themoviedb.org/3
+```
+
+### 3. Instalar dependências e iniciar
+
+```bash
+# Instalar dependências
+npm install
+
+# Iniciar servidor de desenvolvimento
+npm run dev
+```
+
+Abra no navegador em `http://localhost:5173`.
+
+> 💡 **Para login:** você pode digitar qualquer e-mail válido (ex: `dev@cinedash.app`) e qualquer senha com pelo menos 6 caracteres.
+
+---
+
+## 🧪 Testes
+
+A aplicação conta com suíte de testes unitários e de integração utilizando **Vitest** e **Testing Library**:
+
+```bash
+# Executar todos os testes
+npm test
+
+# Executar em modo watch interativo
+npm run test:watch
+```
+
+---
+
+## 🛠️ Scripts Disponíveis
+
+| Comando | Descrição |
+| :--- | :--- |
+| `npm run dev` | Inicia o servidor local de desenvolvimento no Vite |
+| `npm run build` | Valida tipagem com TypeScript e gera o bundle de produção |
+| `npm run preview` | Sobe um servidor local para testar o bundle de produção |
+| `npm run test` | Roda a suíte de testes com Vitest |
+| `npm run lint` | Executa o ESLint para análise estática de código |
+| `npm run prepare` | Configura os hooks do Husky no Git |
+
+---
+
+## 🤝 Padrão de Commits
+
+O repositório utiliza **Husky** e **Commitlint** para garantir mensagens no padrão Conventional Commits (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`).
+
