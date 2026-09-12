@@ -12,17 +12,14 @@ interface MoviesListProps {
 }
 
 export function MoviesList({ filtersControl, className = '' }: MoviesListProps) {
-  const { filters, debouncedSearch, debouncedCast, setPage, resetFilters } = filtersControl
+  const { filters, debouncedSearch, setPage, resetFilters } = filtersControl
 
   const { data, isLoading, isError, error, refetch, isFetching } = useMovies({
     page: filters.page,
-    pageSize: 8,
     filters: {
       search: debouncedSearch,
-      cast: debouncedCast,
-      genres: filters.genres,
+      genreIds: filters.genreIds,
       yearRange: filters.yearRange,
-      ageRating: filters.ageRating,
       minRating: filters.minRating,
       sortBy: filters.sortBy,
     },

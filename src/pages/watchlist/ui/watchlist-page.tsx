@@ -1,16 +1,23 @@
+import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Bookmark, Film } from 'lucide-react'
-import { MovieCard, useMovies } from '@/entities/movie'
+import { MovieCard, MovieCardSkeleton, movieApi } from '@/entities/movie'
 import { LikeButton, useLikedMoviesStore } from '@/features/like-movie'
 import { Header } from '@/widgets/header'
 
 export function WatchlistPage() {
   const likedMovieIds = useLikedMoviesStore((state) => state.likedMovieIds)
-  const { data, isLoading } = useMovies({ pageSize: 100 })
 
-  const likedMovies = (data?.items || []).filter((movie) =>
-    likedMovieIds.includes(movie.id)
-  )
+  const { data: likedMovies = [], isLoading } = useQuery({
+    queryKey: ['watchlist', likedMovieIds],
+    queryFn: async () => {
+      if (likedMovieIds.length === 0) return []
+      const results = await Promise.all(
+        likedMovieIds.map((id) => movieApi.getMovieById(id))
+      )
+      return results.filter((movie): movie is NonNullable<typeof movie> => movie !== null)
+    },
+  })
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -32,7 +39,13 @@ export function WatchlistPage() {
           </p>
         </section>
 
-        {!isLoading && likedMovies.length === 0 ? (
+        {isLoading ? (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+            {Array.from({ length: 4 }).map((_, idx) => (
+              <MovieCardSkeleton key={idx} />
+            ))}
+          </div>
+        ) : likedMovies.length === 0 ? (
           <div className="flex flex-col items-center justify-center gap-4 rounded-2xl border border-dashed border-border bg-card/40 p-12 text-center dark:border-white/10">
             <div className="grid size-16 place-items-center rounded-2xl bg-primary/10 text-primary dark:bg-white/5">
               <Film className="size-8" />

@@ -1,91 +1,123 @@
-import { DEFAULT_PAGE_SIZE } from '@/shared/constants/movie-constants'
-import type { GetMoviesParams, GetMoviesResponse, Movie } from '../model/types'
-import { MOCK_MOVIES } from './mock-movies-data'
+import { tmdbApiClient } from '@/shared/api'
+import { mapTmdbMovieToEntity } from '../model/movie-helpers'
+import type {
+  GetMoviesParams,
+  GetMoviesResponse,
+  Movie,
+  TmdbGenre,
+  TmdbMovieDto,
+  TmdbPaginatedResponse,
+} from '../model/types'
 
 export const movieApi = {
+  async getGenres(): Promise<TmdbGenre[]> {
+    const { data } = await tmdbApiClient.get<{ genres: TmdbGenre[] }>(
+      '/genre/movie/list',
+      {
+        params: { language: 'pt-BR' },
+      }
+    )
+    return data.genres || []
+  },
+
   async getMovies(params: GetMoviesParams = {}): Promise<GetMoviesResponse> {
-    const {
-      page = 1,
-      pageSize = DEFAULT_PAGE_SIZE,
-      filters = {},
-      sortBy = 'popularity',
-    } = params
+    const { page = 1, filters = {}, sortBy = 'popularity.desc' } = params
 
-    await new Promise((resolve) => setTimeout(resolve, 150))
+    const searchQuery = filters.search?.trim()
 
-    let filtered = [...MOCK_MOVIES]
+    if (searchQuery) {
+      const searchParams: Record<string, string | number | boolean> = {
+        query: searchQuery,
+        page,
+        language: 'pt-BR',
+        include_adult: false,
+      }
 
-    if (filters.search && filters.search.trim() !== '') {
-      const normalizedSearch = filters.search.trim().toLowerCase()
-      filtered = filtered.filter(
-        (movie) =>
-          movie.title.toLowerCase().includes(normalizedSearch) ||
-          movie.originalTitle?.toLowerCase().includes(normalizedSearch)
+      if (filters.yearRange && filters.yearRange[0] === filters.yearRange[1]) {
+        searchParams.primary_release_year = filters.yearRange[0]
+      }
+
+      const { data } = await tmdbApiClient.get<TmdbPaginatedResponse<TmdbMovieDto>>(
+        '/search/movie',
+        { params: searchParams }
       )
+
+      let items = (data.results || []).map((dto) => mapTmdbMovieToEntity(dto))
+
+      if (filters.genreIds && filters.genreIds.length > 0) {
+        items = items.filter((movie) =>
+          movie.genreIds.some((id) => filters.genreIds?.includes(id))
+        )
+      }
+
+      if (typeof filters.minRating === 'number' && filters.minRating > 0) {
+        items = items.filter((movie) => movie.rating >= (filters.minRating ?? 0))
+      }
+
+      if (filters.yearRange) {
+        const [minYear, maxYear] = filters.yearRange
+        items = items.filter((movie) => movie.year >= minYear && movie.year <= maxYear)
+      }
+
+      return {
+        items,
+        total: data.total_results,
+        page: data.page,
+        pageSize: 20,
+        totalPages: Math.min(data.total_pages, 500),
+        hasNextPage: data.page < Math.min(data.total_pages, 500),
+        hasPrevPage: data.page > 1,
+      }
     }
 
-    if (filters.cast && filters.cast.trim() !== '') {
-      const normalizedCast = filters.cast.trim().toLowerCase()
-      filtered = filtered.filter((movie) =>
-        movie.cast.some((actor) => actor.toLowerCase().includes(normalizedCast))
-      )
+    const discoverParams: Record<string, string | number | boolean> = {
+      page,
+      language: 'pt-BR',
+      include_adult: false,
+      sort_by: filters.sortBy || sortBy,
     }
 
-    if (filters.genres && filters.genres.length > 0) {
-      filtered = filtered.filter((movie) =>
-        movie.genres.some((genre) => filters.genres?.includes(genre))
-      )
+    if (filters.genreIds && filters.genreIds.length > 0) {
+      discoverParams.with_genres = filters.genreIds.join('|')
+    }
+
+    if (typeof filters.minRating === 'number' && filters.minRating > 0) {
+      discoverParams['vote_average.gte'] = filters.minRating
+      discoverParams['vote_count.gte'] = 50
     }
 
     if (filters.yearRange) {
       const [minYear, maxYear] = filters.yearRange
-      filtered = filtered.filter((movie) => movie.year >= minYear && movie.year <= maxYear)
+      discoverParams['primary_release_date.gte'] = `${minYear}-01-01`
+      discoverParams['primary_release_date.lte'] = `${maxYear}-12-31`
     }
 
-    if (filters.ageRating && filters.ageRating !== 'ALL') {
-      filtered = filtered.filter((movie) => movie.ageRating === filters.ageRating)
-    }
+    const { data } = await tmdbApiClient.get<TmdbPaginatedResponse<TmdbMovieDto>>(
+      '/discover/movie',
+      { params: discoverParams }
+    )
 
-    if (typeof filters.minRating === 'number' && filters.minRating > 0) {
-      filtered = filtered.filter((movie) => movie.rating >= (filters.minRating ?? 0))
-    }
-
-    // Sorting
-    const activeSort = filters.sortBy || sortBy
-    filtered.sort((a, b) => {
-      switch (activeSort) {
-        case 'rating':
-          return b.rating - a.rating
-        case 'latest':
-          return b.year !== a.year ? b.year - a.year : b.rating - a.rating
-        case 'title':
-          return a.title.localeCompare(b.title, 'pt-BR')
-        case 'popularity':
-        default:
-          return b.popularity - a.popularity
-      }
-    })
-
-    const total = filtered.length
-    const totalPages = Math.max(1, Math.ceil(total / pageSize))
-    const currentPage = Math.min(Math.max(1, page), totalPages)
-    const startIndex = (currentPage - 1) * pageSize
-    const paginatedItems = filtered.slice(startIndex, startIndex + pageSize)
+    const items = (data.results || []).map((dto) => mapTmdbMovieToEntity(dto))
 
     return {
-      items: paginatedItems,
-      total,
-      page: currentPage,
-      pageSize,
-      totalPages,
-      hasNextPage: currentPage < totalPages,
-      hasPrevPage: currentPage > 1,
+      items,
+      total: data.total_results,
+      page: data.page,
+      pageSize: 20,
+      totalPages: Math.min(data.total_pages, 500),
+      hasNextPage: data.page < Math.min(data.total_pages, 500),
+      hasPrevPage: data.page > 1,
     }
   },
 
-  async getMovieById(id: string): Promise<Movie | null> {
-    await new Promise((resolve) => setTimeout(resolve, 80))
-    const movie = MOCK_MOVIES.find((m) => m.id === id)
-    return movie || null
+  async getMovieById(id: string | number): Promise<Movie | null> {
+    try {
+      const { data } = await tmdbApiClient.get<TmdbMovieDto>(`/movie/${id}`, {
+        params: { language: 'pt-BR' },
+      })
+      return mapTmdbMovieToEntity(data)
+    } catch {
+      return null
+    }
   },
 }

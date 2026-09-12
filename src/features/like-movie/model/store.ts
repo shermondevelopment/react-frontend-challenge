@@ -14,10 +14,10 @@ function getInitialLikedMovies(): string[] {
   if (typeof window === 'undefined') return []
   try {
     const raw = window.localStorage.getItem(WATCHLIST_STORAGE_KEY)
-    if (!raw) return ['movie-1', 'movie-4'] // Default sample favorites
+    if (!raw) return []
     return JSON.parse(raw) as string[]
   } catch {
-    return ['movie-1', 'movie-4']
+    return []
   }
 }
 

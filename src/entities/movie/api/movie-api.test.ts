@@ -1,89 +1,152 @@
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { tmdbApiClient } from '@/shared/api'
 import { movieApi } from './movie-api'
 
-describe('movieApi', () => {
-  it('returns all movies paginated with default page size', async () => {
-    const response = await movieApi.getMovies({ page: 1, pageSize: 8 })
-    expect(response.items).toHaveLength(8)
-    expect(response.total).toBeGreaterThan(8)
-    expect(response.page).toBe(1)
-    expect(response.totalPages).toBeGreaterThan(1)
-    expect(response.hasNextPage).toBe(true)
-    expect(response.hasPrevPage).toBe(false)
+vi.mock('@/shared/api', () => ({
+  tmdbApiClient: {
+    get: vi.fn(),
+  },
+  getTmdbImageUrl: (path: string | null) => (path ? `https://image.tmdb.org/t/p/w500${path}` : ''),
+}))
+
+describe('movieApi with TMDB', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
   })
 
-  it('filters movies by search query in title', async () => {
-    const response = await movieApi.getMovies({
-      filters: { search: 'Último' },
+  it('fetches genres from /genre/movie/list', async () => {
+    const mockGenres = [
+      { id: 28, name: 'Ação' },
+      { id: 18, name: 'Drama' },
+    ]
+    vi.mocked(tmdbApiClient.get).mockResolvedValueOnce({
+      data: { genres: mockGenres },
+    } as never)
+
+    const genres = await movieApi.getGenres()
+    expect(tmdbApiClient.get).toHaveBeenCalledWith('/genre/movie/list', {
+      params: { language: 'pt-BR' },
     })
-    expect(response.items.length).toBeGreaterThanOrEqual(1)
-    expect(response.items[0].title).toContain('Último')
+    expect(genres).toEqual(mockGenres)
   })
 
-  it('filters movies by cast / actor', async () => {
+  it('uses /discover/movie when no search query is present', async () => {
+    vi.mocked(tmdbApiClient.get).mockResolvedValueOnce({
+      data: {
+        page: 1,
+        results: [
+          {
+            id: 101,
+            title: 'Interestelar',
+            original_title: 'Interstellar',
+            overview: 'Uma aventura no espaço.',
+            poster_path: '/poster.jpg',
+            backdrop_path: '/backdrop.jpg',
+            release_date: '2014-11-07',
+            vote_average: 8.6,
+            vote_count: 32000,
+            popularity: 120,
+            genre_ids: [878, 18],
+          },
+        ],
+        total_pages: 5,
+        total_results: 100,
+      },
+    } as never)
+
     const response = await movieApi.getMovies({
-      filters: { cast: 'Keanu Reeves' },
+      page: 1,
+      filters: {
+        genreIds: [878, 18],
+        yearRange: [2010, 2020],
+        minRating: 8,
+        sortBy: 'vote_average.desc',
+      },
     })
-    expect(response.items.length).toBeGreaterThanOrEqual(1)
-    expect(response.items.every((m) => m.cast.includes('Keanu Reeves'))).toBe(true)
+
+    expect(tmdbApiClient.get).toHaveBeenCalledWith(
+      '/discover/movie',
+      expect.objectContaining({
+        params: expect.objectContaining({
+          page: 1,
+          language: 'pt-BR',
+          with_genres: '878|18',
+          'vote_average.gte': 8,
+          'primary_release_date.gte': '2010-01-01',
+          'primary_release_date.lte': '2020-12-31',
+          sort_by: 'vote_average.desc',
+        }),
+      })
+    )
+
+    expect(response.items).toHaveLength(1)
+    expect(response.items[0].title).toBe('Interestelar')
+    expect(response.items[0].year).toBe(2014)
   })
 
-  it('filters movies by genre', async () => {
+  it('uses /search/movie when search text is provided', async () => {
+    vi.mocked(tmdbApiClient.get).mockResolvedValueOnce({
+      data: {
+        page: 1,
+        results: [
+          {
+            id: 202,
+            title: 'Matrix',
+            original_title: 'The Matrix',
+            overview: 'Bem-vindo ao mundo real.',
+            poster_path: '/matrix.jpg',
+            release_date: '1999-03-31',
+            vote_average: 8.2,
+            vote_count: 24000,
+            popularity: 85,
+            genre_ids: [28, 878],
+          },
+        ],
+        total_pages: 1,
+        total_results: 1,
+      },
+    } as never)
+
     const response = await movieApi.getMovies({
-      filters: { genres: ['Ficção Científica'] },
+      filters: { search: 'Matrix' },
     })
-    expect(response.items.length).toBeGreaterThanOrEqual(1)
-    expect(
-      response.items.every((m) => m.genres.includes('Ficção Científica'))
-    ).toBe(true)
+
+    expect(tmdbApiClient.get).toHaveBeenCalledWith(
+      '/search/movie',
+      expect.objectContaining({
+        params: expect.objectContaining({
+          query: 'Matrix',
+          page: 1,
+          language: 'pt-BR',
+        }),
+      })
+    )
+
+    expect(response.items).toHaveLength(1)
+    expect(response.items[0].title).toBe('Matrix')
   })
 
-  it('filters movies by year range', async () => {
-    const response = await movieApi.getMovies({
-      filters: { yearRange: [2022, 2024] },
-    })
-    expect(
-      response.items.every((m) => m.year >= 2022 && m.year <= 2024)
-    ).toBe(true)
-  })
+  it('fetches single movie detail from /movie/:id', async () => {
+    vi.mocked(tmdbApiClient.get).mockResolvedValueOnce({
+      data: {
+        id: 550,
+        title: 'Clube da Luta',
+        original_title: 'Fight Club',
+        overview: 'Um homem deprimido...',
+        poster_path: '/fightclub.jpg',
+        release_date: '1999-10-15',
+        vote_average: 8.4,
+        vote_count: 26000,
+        popularity: 90,
+        genres: [{ id: 18, name: 'Drama' }],
+      },
+    } as never)
 
-  it('filters movies by minimum rating', async () => {
-    const response = await movieApi.getMovies({
-      filters: { minRating: 8.5 },
+    const movie = await movieApi.getMovieById(550)
+    expect(tmdbApiClient.get).toHaveBeenCalledWith('/movie/550', {
+      params: { language: 'pt-BR' },
     })
-    expect(response.items.every((m) => m.rating >= 8.5)).toBe(true)
-  })
-
-  it('filters movies by age rating classification', async () => {
-    const response = await movieApi.getMovies({
-      filters: { ageRating: '16+' },
-    })
-    expect(response.items.every((m) => m.ageRating === '16+')).toBe(true)
-  })
-
-  it('sorts movies by rating descending', async () => {
-    const response = await movieApi.getMovies({
-      sortBy: 'rating',
-    })
-    const ratings = response.items.map((m) => m.rating)
-    for (let i = 0; i < ratings.length - 1; i++) {
-      expect(ratings[i]).toBeGreaterThanOrEqual(ratings[i + 1])
-    }
-  })
-
-  it('sorts movies by title alphabetically', async () => {
-    const response = await movieApi.getMovies({
-      sortBy: 'title',
-    })
-    const titles = response.items.map((m) => m.title)
-    const sortedTitles = [...titles].sort((a, b) => a.localeCompare(b, 'pt-BR'))
-    expect(titles).toEqual(sortedTitles)
-  })
-
-  it('fetches movie detail by id', async () => {
-    const movie = await movieApi.getMovieById('movie-1')
-    expect(movie).not.toBeNull()
-    expect(movie?.id).toBe('movie-1')
-    expect(movie?.title).toBe('O Último Refúgio')
+    expect(movie?.title).toBe('Clube da Luta')
+    expect(movie?.genreNames).toContain('Drama')
   })
 })

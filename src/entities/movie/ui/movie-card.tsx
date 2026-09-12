@@ -12,7 +12,7 @@ export interface MovieCardProps {
 }
 
 export function MovieCard({ movie, actionSlot, className = '', onClick }: MovieCardProps) {
-  const primaryGenre = movie.genres[0] || 'Geral'
+  const primaryGenre = movie.genreNames[0] || 'Filme'
 
   return (
     <article
@@ -27,34 +27,28 @@ export function MovieCard({ movie, actionSlot, className = '', onClick }: MovieC
           loading="lazy"
           className="size-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           onError={(e) => {
-            // Fallback to placeholder if image fails
             e.currentTarget.src =
               'https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=600&q=80'
           }}
         />
 
-        {/* Gradient shadow overlay */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent opacity-60 transition-opacity group-hover:opacity-80" />
 
-        {/* Action slot (e.g. Like / Favorite button) */}
         {actionSlot && (
           <div className="absolute right-3 top-3 z-10 transition-transform active:scale-90">
             {actionSlot}
           </div>
         )}
 
-        {/* Year & Age Badge overlay at top-left */}
-        <div className="absolute left-3 top-3 z-10 flex items-center gap-1.5">
-          <span className="rounded-md border border-white/15 bg-black/50 px-2 py-0.5 text-xs font-semibold text-white/90 backdrop-blur-md">
-            {movie.year}
-          </span>
-          <span className="rounded-md border border-white/15 bg-black/50 px-1.5 py-0.5 text-xs font-semibold text-white/90 backdrop-blur-md">
-            {movie.ageRating}
-          </span>
-        </div>
+        {movie.year > 0 && (
+          <div className="absolute left-3 top-3 z-10 flex items-center gap-1.5">
+            <span className="rounded-md border border-white/15 bg-black/50 px-2 py-0.5 text-xs font-semibold text-white/90 backdrop-blur-md">
+              {movie.year}
+            </span>
+          </div>
+        )}
       </div>
 
-      {/* Card Info */}
       <div className="flex flex-col gap-1.5 pt-3">
         <h3
           title={movie.title}

@@ -4,24 +4,28 @@ import type { Movie } from '../model/types'
 import { MovieCard } from './movie-card'
 
 const mockMovie: Movie = {
-  id: 'movie-test-1',
+  id: '157336',
+  tmdbId: 157336,
   title: 'Interestelar',
+  originalTitle: 'Interstellar',
+  synopsis: 'As reservas naturais da Terra estão chegando ao fim...',
   posterUrl: 'https://example.com/poster.jpg',
+  backdropUrl: 'https://example.com/backdrop.jpg',
   rating: 8.9,
-  genres: ['Ficção Científica', 'Drama'],
+  voteCount: 32000,
+  genreIds: [878, 18],
+  genreNames: ['Ficção Científica', 'Drama'],
   year: 2014,
-  ageRating: '10+',
-  cast: ['Matthew McConaughey', 'Anne Hathaway'],
+  releaseDate: '2014-11-05',
   popularity: 100,
 }
 
 describe('MovieCard', () => {
-  it('renders movie title, year, age rating and primary genre', () => {
+  it('renders movie title, year and primary genre', () => {
     render(<MovieCard movie={mockMovie} />)
 
     expect(screen.getByRole('heading', { name: 'Interestelar' })).toBeInTheDocument()
     expect(screen.getByText('2014')).toBeInTheDocument()
-    expect(screen.getByText('10+')).toBeInTheDocument()
     expect(screen.getByText('Ficção Científica')).toBeInTheDocument()
     expect(screen.getByText('8.9')).toBeInTheDocument()
   })

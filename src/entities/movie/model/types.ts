@@ -1,42 +1,64 @@
-import type { MovieGenre } from '@/shared/constants/movie-constants'
+export interface TmdbGenre {
+  id: number
+  name: string
+}
 
-export type { MovieGenre }
+export interface TmdbMovieDto {
+  id: number
+  title: string
+  original_title: string
+  overview: string
+  poster_path: string | null
+  backdrop_path: string | null
+  release_date: string
+  vote_average: number
+  vote_count: number
+  popularity: number
+  genre_ids?: number[]
+  genres?: TmdbGenre[]
+  adult?: boolean
+}
 
-export type AgeRating = 'L' | '10+' | '12+' | '14+' | '16+' | '18+'
-
-export type MovieSortOption = 'popularity' | 'rating' | 'latest' | 'title'
+export interface TmdbPaginatedResponse<T> {
+  page: number
+  results: T[]
+  total_pages: number
+  total_results: number
+}
 
 export interface Movie {
   id: string
+  tmdbId: number
   title: string
-  originalTitle?: string
+  originalTitle: string
+  synopsis: string
   posterUrl: string
-  backdropUrl?: string
+  backdropUrl: string | null
   rating: number
-  votesCount?: number
-  genres: MovieGenre[]
-  year: number
-  ageRating: AgeRating
-  cast: string[]
-  director?: string
-  durationMinutes?: number
-  synopsis?: string
+  voteCount: number
   popularity: number
+  year: number
+  releaseDate: string
+  genreIds: number[]
+  genreNames: string[]
 }
+
+export type MovieSortOption =
+  | 'popularity.desc'
+  | 'vote_average.desc'
+  | 'primary_release_date.desc'
+  | 'title.asc'
 
 export interface MovieFilters {
   search?: string
-  cast?: string
-  genres?: MovieGenre[]
+  genreIds?: number[]
   yearRange?: [number, number]
-  ageRating?: string
   minRating?: number
   sortBy?: MovieSortOption
 }
 
 export interface GetMoviesParams {
   page?: number
-  pageSize?: number
   filters?: MovieFilters
   sortBy?: MovieSortOption
 }

@@ -1,36 +1,70 @@
-import type { AgeRating } from './types'
+import { getTmdbImageUrl } from '@/shared/api'
+import type { Movie, TmdbGenre, TmdbMovieDto } from './types'
+
+export const DEFAULT_TMDB_GENRES: Record<number, string> = {
+  28: 'Ação',
+  12: 'Aventura',
+  16: 'Animação',
+  35: 'Comédia',
+  80: 'Crime',
+  99: 'Documentário',
+  18: 'Drama',
+  10751: 'Família',
+  14: 'Fantasia',
+  36: 'História',
+  27: 'Terror',
+  10402: 'Música',
+  9648: 'Mistério',
+  10749: 'Romance',
+  878: 'Ficção Científica',
+  10770: 'Cinema TV',
+  53: 'Thriller',
+  10752: 'Guerra',
+  37: 'Faroeste',
+}
 
 export function formatRating(rating: number): string {
+  if (typeof rating !== 'number' || isNaN(rating)) return '0.0'
   return rating.toFixed(1)
 }
 
-export function formatYear(year: number): string {
-  return year.toString()
+export function formatYear(dateString?: string): number {
+  if (!dateString) return new Date().getFullYear()
+  const year = parseInt(dateString.slice(0, 4), 10)
+  return isNaN(year) ? new Date().getFullYear() : year
 }
 
-export function formatDuration(minutes?: number): string {
-  if (!minutes) return ''
-  const hours = Math.floor(minutes / 60)
-  const remainingMinutes = minutes % 60
-  if (hours === 0) return `${remainingMinutes}min`
-  return `${hours}h ${remainingMinutes}min`
-}
+export function mapTmdbMovieToEntity(
+  dto: TmdbMovieDto,
+  genreMap: Record<number, string> = DEFAULT_TMDB_GENRES
+): Movie {
+  const genreIds = dto.genre_ids || (dto.genres ? dto.genres.map((g) => g.id) : [])
+  const genreNames = dto.genres
+    ? dto.genres.map((g) => g.name)
+    : genreIds.map((id) => genreMap[id]).filter(Boolean)
 
-export function getAgeRatingColor(ageRating: AgeRating): string {
-  switch (ageRating) {
-    case 'L':
-      return 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
-    case '10+':
-      return 'bg-blue-500/20 text-blue-400 border-blue-500/30'
-    case '12+':
-      return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
-    case '14+':
-      return 'bg-orange-500/20 text-orange-400 border-orange-500/30'
-    case '16+':
-      return 'bg-red-500/20 text-red-400 border-red-500/30'
-    case '18+':
-      return 'bg-neutral-900 text-red-500 border-red-600/40'
-    default:
-      return 'bg-white/10 text-white border-white/20'
+  return {
+    id: String(dto.id),
+    tmdbId: dto.id,
+    title: dto.title || dto.original_title || 'Sem título',
+    originalTitle: dto.original_title || '',
+    synopsis: dto.overview || 'Sinopse indisponível no momento.',
+    posterUrl: getTmdbImageUrl(dto.poster_path, 'w500'),
+    backdropUrl: dto.backdrop_path ? getTmdbImageUrl(dto.backdrop_path, 'w780') : null,
+    rating: Number(dto.vote_average) || 0,
+    voteCount: dto.vote_count || 0,
+    popularity: dto.popularity || 0,
+    year: formatYear(dto.release_date),
+    releaseDate: dto.release_date || '',
+    genreIds,
+    genreNames: genreNames.length > 0 ? genreNames : ['Geral'],
   }
+}
+
+export function buildGenreMap(genres: TmdbGenre[]): Record<number, string> {
+  const map: Record<number, string> = {}
+  for (const genre of genres) {
+    map[genre.id] = genre.name
+  }
+  return map
 }

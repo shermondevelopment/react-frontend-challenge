@@ -28,6 +28,10 @@ export function Select({
   onValueChange,
   'aria-label': ariaLabel,
 }: SelectProps) {
+  const selectedOption = options.find(
+    (option) => option.value === (value ?? defaultValue)
+  )
+
   return (
     <SelectPrimitive.Root
       value={value}
@@ -47,7 +51,9 @@ export function Select({
         )}
         aria-label={ariaLabel}
       >
-        <SelectPrimitive.Value placeholder={placeholder} />
+        <span className="truncate">
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
         <SelectPrimitive.Icon>
           <ChevronDown className="size-4 opacity-60 transition-transform duration-200 group-data-[popup-open]:rotate-180" />
         </SelectPrimitive.Icon>

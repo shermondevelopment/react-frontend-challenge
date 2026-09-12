@@ -1,8 +1,6 @@
 import { SlidersHorizontal, RotateCcw } from 'lucide-react'
 import type { UseMovieFiltersReturn } from '@/features/filter-movies'
 import {
-  AgeRatingFilter,
-  CastSearchInput,
   GenreChips,
   RatingSliderFilter,
   YearRangeFilter,
@@ -25,10 +23,8 @@ export function MoviesFiltersContent({
     filters,
     isDirty,
     activeFilterCount,
-    setCast,
     toggleGenre,
     setYearRange,
-    setAgeRating,
     setMinRating,
     resetFilters,
     applyFilters,
@@ -55,16 +51,12 @@ export function MoviesFiltersContent({
         </div>
       )}
 
-      <CastSearchInput value={filters.cast} onChange={setCast} />
-
       <div className="space-y-2">
         <label className="block text-xs font-semibold text-foreground">Gênero</label>
-        <GenreChips selectedGenres={filters.genres} onToggleGenre={toggleGenre} />
+        <GenreChips selectedGenreIds={filters.genreIds} onToggleGenre={toggleGenre} />
       </div>
 
       <YearRangeFilter value={filters.yearRange} onChange={setYearRange} />
-
-      <AgeRatingFilter value={filters.ageRating} onChange={setAgeRating} />
 
       <RatingSliderFilter value={filters.minRating} onChange={setMinRating} />
 
