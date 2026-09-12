@@ -1,162 +1,134 @@
-# React Frontend Challenge
+# 🎬 CineDash
 
-Setup inicial com Vite, React e TypeScript, criado diretamente na pasta atual.
+> Dashboard moderno e intuitivo para curadoria e descoberta de filmes consumindo a **[TMDB API](https://developer.themoviedb.org/docs/getting-started)**.
 
-## Inicializacao
+Construído com **React 19**, **TypeScript**, **Vite**, **Tailwind CSS v4**, **TanStack Router**, **TanStack Query**, gerenciamento de estado via **Zustand** e estruturado seguindo o padrão **Feature-Sliced Design (FSD)**.
 
-Comando usado para criar o projeto sem gerar uma nova pasta:
+---
 
-```bash
-npm create vite@latest . -- --template react-ts
-npm install
-```
+## ✨ O que tem na aplicação?
 
-No prompt do Vite, foi escolhido `ESLint` como linter.
+### 🔐 Autenticação Simulada
+- Formulário tipado e validado via **[Zod](https://zod.dev/)** + **React Hook Form**.
+- Sessão persistida em **`localStorage`** com o middleware `persist` do **Zustand**.
+- Rotas protegidas com _route guards_ nativos do **[TanStack Router](https://tanstack.com/router/latest)** (redireciona automaticamente caso o usuário não esteja autenticado).
 
-## Scripts
+### 🍿 Discovery (Exploração & Filtros)
+- Listagem dos filmes em destaque da semana.
+- Busca em tempo real com _debounce_ de 400ms.
+- **Filtros combináveis**:
+  - Gêneros cinematográficos (chips interativos);
+  - Ano de lançamento (range de anos);
+  - Nota mínima (slider interativo de rating);
+  - Ordenação por popularidade, título ou avaliação.
+- **Sincronização com a URL**: filtros e paginação são refletidos na query string como fonte única de verdade (fácil de compartilhar links ou usar o histórico do navegador).
+- Feedback visual durante carregamento com _skeletons_ customizados.
 
-```bash
-npm run dev
-npm run build
-npm run preview
-```
+### 📌 Watchlist Interativa
+- Adição e remoção de filmes salvos em `localStorage`.
+- Visualização em tabela completa via **[TanStack Table](https://tanstack.com/table/latest)**: ordenação por colunas e filtro por título.
+- Modal de confirmação para remoções e feedback imediato via toasts (**Sonner**).
+- Design responsivo adaptado para desktop e mobile.
 
-## Estrutura
+### 🎥 Detalhes do Filme
+- Página dedicada com sinopse, gêneros, elenco principal e metadados.
+- Player de trailer integrado com embed seguro do YouTube.
+- Ação rápida para salvar ou remover da sua Watchlist.
+
+### 🌓 Tema Dark / Light
+- Alternância rápida entre modos claro e escuro com preferência salva no navegador (`localStorage`).
+
+---
+
+## 🏗️ Arquitetura (Feature-Sliced Design)
+
+O projeto foi estruturado seguindo o padrão **[Feature-Sliced Design (FSD)](https://feature-sliced.design/)**, organizando o código em camadas com limites bem definidos de responsabilidade:
 
 ```txt
 src/
-  main.tsx
-  App.tsx
-  components/
-    HelloWorld.tsx
-  styles/
-    global.css
+├── app/        # Inicialização da app, providers globais, router e estilos
+├── pages/      # Views completas correspondentes às rotas
+├── widgets/    # Blocos compostos e autônomos (Header, MoviesFilters, WatchlistTable...)
+├── features/   # Casos de uso e interações (auth/signin, auth/logout, filter-movies, theme...)
+├── entities/   # Modelos de domínio, tipos e stores de entidade (movie, auth...)
+└── shared/     # Componentes base (shadcn/ui), api clients (TMDB), hooks e utils
 ```
 
-## Alias de importacao
+- **Code Splitting**: carregamento sob demanda por rota com `lazyRouteComponent`.
+- **Cache Otimizado**: gerenciamento de estado assíncrono com **TanStack Query**, configurado com `staleTime` para evitar chamadas redundantes à API.
+- **Acessibilidade**: navegação acessível, elementos semânticos e estados descritivos.
 
-O alias `@` aponta para `src`.
+---
 
-```ts
-import { HelloWorld } from '@/components/HelloWorld'
-```
+## 🚀 Como rodar o projeto
 
-Trecho principal em `vite.config.ts`:
+### 1. Pré-requisitos
+- Node.js (versão 20+ recomendada)
+- Gerenciador de pacotes `npm`
+- Uma chave de API (**API Read Access Token**) do [The Movie Database (TMDB)](https://www.themoviedb.org/settings/api)
 
-```ts
-resolve: {
-  alias: {
-    '@': fileURLToPath(new URL('./src', import.meta.url)),
-  },
-},
-```
+### 2. Configurar Variáveis de Ambiente
 
-Trecho principal em `tsconfig.app.json`:
-
-```json
-{
-  "compilerOptions": {
-    "strict": true,
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  }
-}
-```
-
-## Exemplo tipado
-
-```tsx
-type HelloWorldProps = {
-  name: string
-}
-
-export function HelloWorld({ name }: HelloWorldProps) {
-  return <p>Hello World com {name}</p>
-}
-```
-
-## Estilos
-
-Os estilos globais ficam em `src/styles/global.css`. Isso deixa o projeto pronto para receber TailwindCSS futuramente sem instalar agora.
-
-Quando for adicionar Tailwind, este arquivo pode receber a entrada do Tailwind e continuar sendo importado em `src/main.tsx`.
-
-## Rodando
+Crie um arquivo `.env` (ou `.env.local`) a partir do exemplo:
 
 ```bash
+cp .env.example .env
+```
+
+Preencha com o seu token do TMDB:
+
+```env
+# API Read Access Token (Bearer Token do TMDB)
+VITE_TMDB_ACCESS_TOKEN=seu_access_token_aqui
+
+# URL base da API
+VITE_TMDB_BASE_URL=https://api.themoviedb.org/3
+```
+
+### 3. Instalar dependências e iniciar
+
+```bash
+# Instalar dependências
+npm install
+
+# Iniciar servidor de desenvolvimento
 npm run dev
 ```
 
-Depois acesse a URL exibida pelo Vite no terminal, normalmente `http://localhost:5173/`.
+Abra no navegador em `http://localhost:5173`.
 
-## Husky + Commitlint
+> 💡 **Para login:** você pode digitar qualquer e-mail válido (ex: `dev@cinedash.app`) e qualquer senha com pelo menos 6 caracteres.
 
-Configuracao para validar automaticamente mensagens de commit no padrao Conventional Commits.
+---
 
-### Instalacao
+## 🧪 Testes
 
-```bash
-npm install --save-dev husky @commitlint/cli @commitlint/config-conventional
-npx husky init
-```
-
-O comando `npx husky init` adiciona o script `prepare` no `package.json`:
-
-```json
-{
-  "scripts": {
-    "prepare": "husky"
-  }
-}
-```
-
-### Arquivo `.commitlintrc`
-
-```json
-{
-  "extends": ["@commitlint/config-conventional"],
-  "rules": {
-    "type-enum": [
-      2,
-      "always",
-      ["feat", "fix", "chore", "docs", "refactor", "test"]
-    ]
-  }
-}
-```
-
-### Hook `.husky/commit-msg`
-
-```sh
-npx --no -- commitlint --config .commitlintrc --edit "$1"
-```
-
-Se estiver configurando manualmente, garanta permissao de execucao no hook:
+A aplicação conta com suíte de testes unitários e de integração utilizando **Vitest** e **Testing Library**:
 
 ```bash
-chmod +x .husky/commit-msg
+# Executar todos os testes
+npm test
+
+# Executar em modo watch interativo
+npm run test:watch
 ```
 
-### Commits validos
+---
 
-```bash
-git commit -m "feat: add login page"
-git commit -m "fix: handle empty response"
-git commit -m "chore: update dependencies"
-git commit -m "docs: update setup instructions"
-git commit -m "refactor: simplify component state"
-git commit -m "test: add app render test"
-```
+## 🛠️ Scripts Disponíveis
 
-### Commits invalidos
+| Comando | Descrição |
+| :--- | :--- |
+| `npm run dev` | Inicia o servidor local de desenvolvimento no Vite |
+| `npm run build` | Valida tipagem com TypeScript e gera o bundle de produção |
+| `npm run preview` | Sobe um servidor local para testar o bundle de produção |
+| `npm run test` | Roda a suíte de testes com Vitest |
+| `npm run lint` | Executa o ESLint para análise estática de código |
+| `npm run prepare` | Configura os hooks do Husky no Git |
 
-```bash
-git commit -m "add login page"
-git commit -m "feature: add login page"
-git commit -m "feat add login page"
-```
+---
 
-### Fluxo
+## 🤝 Padrão de Commits
 
-Ao executar `git commit`, o Git chama o hook `.husky/commit-msg`. Esse hook executa o `commitlint` lendo a mensagem do commit; se ela nao seguir o padrao configurado, o commit e bloqueado antes de ser criado.
+O repositório utiliza **Husky** e **Commitlint** para garantir mensagens no padrão Conventional Commits (`feat:`, `fix:`, `chore:`, `docs:`, `refactor:`, `test:`).
+
